@@ -1,4 +1,4 @@
-import requests, json, datetime
+import requests, json, datetime, re
 from bs4 import BeautifulSoup
 
 class job_listing:
@@ -6,17 +6,16 @@ class job_listing:
         self.company = company
         self.jobTitle = jobTitle
         self.location = location
-        self.dataApplied = dateApplied
+        self.dateApplied = dateApplied
         self.salaryRange = salaryRange
         self.jobURL = jobURL
 
-applicationUrl1 = "https://jobs.ashbyhq.com/ramp/0ea43bb5-201b-4626-ae19-1d7ae3a3193f"
+applicationUrl1 = "https://job-boards.greenhouse.io/notion/jobs/6521100003"
 applicationUrl2 = "https://jobs.ashbyhq.com/multiverse/8b0ca0d5-3f6a-4e51-a7dd-36a67c473663"
 applicationUrl3 = "https://jobs.ashbyhq.com/ramp/0ea43bb5-201b-4626-ae19-1d7ae3a3193f"
 
-def build_job_listing(applicationURL):
+def build_job_listing_ashby(applicationURL):
     URL = applicationURL
-    print("Here is your link: " + URL)
 
     response = requests.get(URL)
     html_data = response.text
@@ -25,19 +24,45 @@ def build_job_listing(applicationURL):
     res = soup.find('script')
     json_object = json.loads(res.contents[0])
 
-    location = json_object['jobLocation']['address']['addressLocality']
+    location = json_object['jobLocation']['address']['addressLocality'] 
+    locationSt = json_object['jobLocation']['address']['addressRegion']
     minValue = json_object['baseSalary']['value']['minValue']
     maxValue = json_object['baseSalary']['value']['maxValue']
     jobTitle = json_object['title']
     company = json_object['hiringOrganization']['name']
     today = datetime.date.today()
 
-    job = job_listing(company, jobTitle, location, today, f"{minValue:,}" + ' - ' + f"{maxValue:,}", URL)
+    job = job_listing(company, jobTitle, location + ", " + locationSt, today, f"${minValue:,}" + ' - ' + f"${maxValue:,}", URL)
     print(vars(job))
 
-build_job_listing(applicationUrl1)
-build_job_listing(applicationUrl2)
-build_job_listing(applicationUrl3)
+def build_job_listing_greenhouse(applicationURL):
+    URL = applicationURL
+
+    response = requests.get(URL)
+    html_data = response.text
+    soup = BeautifulSoup(html_data, "html.parser")
+    
+    description_tag = soup.find('meta', {'property': 'og:description'})
+    location = description_tag.get('content') ##Job Location for Greenhouse applications
+
+    title_tag = soup.find('meta', {'property': 'og:title'})
+    jobTitle = title_tag.get('content') ##Title for Greenhouse applications
+
+    company = URL.split("greenhouse.io/")[1].split("/")[0]
+    company = company.capitalize() ## Company Name
+
+    salary_range = re.findall(r'\$\d{1,3}(?:,\d{3})*', html_data)
+    salary = (salary_range[0] + " - " + salary_range[1]) ## Salary Range
+
+    today = datetime.date.today() #Time Applied
+
+    job = job_listing(company, jobTitle, location, today, salary, URL)
+    print(vars(job))
+
+
+build_job_listing_greenhouse(applicationUrl1)
+#build_job_listing(applicationUrl2)
+#build_job_listing_ashby(applicationUrl3)
 
 
 
