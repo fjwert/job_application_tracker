@@ -12,7 +12,7 @@ class job_listing:
 
 applicationUrl1 = "https://job-boards.greenhouse.io/notion/jobs/6521100003"
 applicationUrl2 = "https://jobs.ashbyhq.com/multiverse/8b0ca0d5-3f6a-4e51-a7dd-36a67c473663"
-applicationUrl3 = "https://jobs.ashbyhq.com/imprint/3cf70751-e01e-45b5-a7a6-d89f4d8d449c?utm_source=aRoGLll8KW"
+applicationUrl3 = "https://jobs.ashbyhq.com/imprint/3cf70751-e01e-45b5-a7a6-d89f4d8d449c?utm_source=aRoGLll8KW" ##no longer exists, use as test case
 
 def build_job_listing_ashby(applicationURL):
     URL = applicationURL
@@ -22,8 +22,17 @@ def build_job_listing_ashby(applicationURL):
 
     soup = BeautifulSoup(html_data, "html.parser")
     res = soup.find('script')
-    json_object = json.loads(res.contents[0])
-
+    if res.contents and res.contents[0] is not None:
+        try:
+            json_object = json.loads(res.contents[0])
+        except json.JSONDecodeError as e:
+            print(f"Error Decoding JSON: {e}")
+            return
+    else:
+        print("No content Job listing not found")
+        return
+    
+    
     location = json_object['jobLocation']['address']['addressLocality'] 
     locationSt = json_object['jobLocation']['address']['addressRegion']
     minValue = json_object['baseSalary']['value']['minValue']
@@ -74,10 +83,12 @@ Notes for implementation:
     Successfully parsing JSON data
     Currently works for the following job listing sites:
         Ashby
-        
+        Greenhouse
 - Need to find a way to store all the information to retrieve from local.
 - Current plan Capture: Title, Company, Compensation, The Date the link is entered, Location, 
-
-
+-----
+Bugs:
+    Is job listing no longer exists we get json errors. 
+        Need to verify json loads prior to running scraping commands
 
 '''
