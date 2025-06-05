@@ -12,7 +12,7 @@ class job_listing:
 
 applicationUrl1 = "https://job-boards.greenhouse.io/notion/jobs/6521100003"
 applicationUrl2 = "https://jobs.ashbyhq.com/multiverse/8b0ca0d5-3f6a-4e51-a7dd-36a67c473663"
-applicationUrl3 = "https://jobs.ashbyhq.com/ramp/0ea43bb5-201b-4626-ae19-1d7ae3a3193f"
+applicationUrl3 = "https://jobs.ashbyhq.com/imprint/3cf70751-e01e-45b5-a7a6-d89f4d8d449c?utm_source=aRoGLll8KW"
 
 def build_job_listing_ashby(applicationURL):
     URL = applicationURL
@@ -60,9 +60,9 @@ def build_job_listing_greenhouse(applicationURL):
     print(vars(job))
 
 
-build_job_listing_greenhouse(applicationUrl1)
+#build_job_listing_greenhouse(applicationUrl1)
 #build_job_listing(applicationUrl2)
-#build_job_listing_ashby(applicationUrl3)
+build_job_listing_ashby(applicationUrl3)
 
 
 
